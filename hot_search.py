@@ -6,7 +6,7 @@ import requests
 import pymysql
 
 # 建立数据库连接
-cnx = pymysql.connect(host='localhost', port=3306, user='root', password='123456',
+cnx = pymysql.connect(host='localhost', port=3306, user='root', password='root',
                       db='weibo', charset='utf8mb4')
 
 # 创建游标
@@ -86,28 +86,19 @@ ua_all = [
 
 header = {
     "referer": "https://weibo.com/hot/search",
-    "sec-ch-ua": "\"Chromium\";v=\"112\", \"Google Chrome\";v=\"112\", \"Not:A-Brand\";v=\"99\"",
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": "\"Windows\"",
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
-    "server-version": "v2023.04.13.2",
-    "traceparent": "00-e18731efac84cf3c6f1e07fd415a6baa-9892ddda1e667fa1-00",
     "User-Agent": random.choice(ua_all),
-    "x-requested-with": "XMLHttpRequest",
-    "x-xsrf-token": "C9Umi5B-n_Epz-OK8Ox3Cxtj"
 }
 
 a = requests.get('https://weibo.com/ajax/statuses/hot_band', headers=header)
 response = json.loads(a.text)
-data = response['data']['band_list']
+data = response['data']['band_list']    #取出data键对应的值，然后再从该值中取出band_list键对应的值
 for i in data:
     # 获取当前日期和时间
-    now = datetime.datetime.now()
+    now = datetime.datetime.now()  #2023-05-08 17:55:16.678888
     # 提取年、月、日
     year = now.year
     month = now.month
+    #一直到name变量都是在格式化日期和时间
     if len(str(month)) == 1:
         month = '0' + str(month)
     day = now.day
@@ -124,8 +115,9 @@ for i in data:
         second = '0' + str(second)
     date = '{}-{}-{}'.format(year, month, day)
     time = '{}:{}:{}'.format(hour, minute, second)
-    name = i['word']
-    if 'raw_hot' in i:
+    name = i['word']  #word是json文件中数据的标题   将i中word的值赋值给变量name  注意i还是所有
+    if 'raw_hot' in i:  #raw_hot是热点值  判断字典 i 中是否有键名为 'raw_hot' 的项
+        #提取数据到变量
         hot_index = i['realpos']
         raw_hot = i['raw_hot']
         label_name = i['label_name']
