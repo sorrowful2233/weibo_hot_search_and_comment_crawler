@@ -6,7 +6,7 @@ import requests
 import pymysql
 
 # 建立数据库连接
-cnx = pymysql.connect(host='localhost', port=3306, user='root', password='root',
+cnx = pymysql.connect(host='localhost', port=3306, user='root', password='2233',
                       db='weibo', charset='utf8mb4')
 
 # 创建游标
@@ -116,19 +116,21 @@ for i in data:
     date = '{}-{}-{}'.format(year, month, day)
     time = '{}:{}:{}'.format(hour, minute, second)
     name = i['word']  #word是json文件中数据的标题   将i中word的值赋值给变量name  注意i还是所有
-    if 'raw_hot' in i:  #raw_hot是热点值  判断字典 i 中是否有键名为 'raw_hot' 的项
-        #提取数据到变量
+    if 'raw_hot' in i:  #raw_hot是热点值  如果这次循环的i中有row_raw_hot将会开始提取这次循环i的数据
+        #提取数据到变量,之后会再将数据保存到数据库
         hot_index = i['realpos']
         raw_hot = i['raw_hot']
         label_name = i['label_name']
         datail_name = str(i['word_scheme']).replace('#', '%23')
         url = f'https://s.weibo.com/weibo?q={datail_name}'
+        #将变量储存的数据整理好放入data字典
         data = {'date': date, 'time': time, 'hot_index': hot_index, 'name': name, 'raw_hot': raw_hot,
                 'label_name': label_name, 'url': url}
         print(data)
-        data_tuple = tuple(data.values())
+        data_tuple = tuple(data.values())  #将数据元祖化   预防SQL注入攻击
+        #通过使用占位符（%s）指定了需要插入的值的位置
         add_data = "INSERT INTO hot_search (date, time,hot_index, name, raw_hot, label_name, url) VALUES (%s, %s,%s, %s, %s,%s, %s)"
-        cursor.execute(add_data, data_tuple)
+        cursor.execute(add_data, data_tuple)   #这个代码会将 data_tuple 中的数据按照顺序插入到 add_data 所指定的表中
         cnx.commit()
     else:
         pass
